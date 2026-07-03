@@ -1,0 +1,56 @@
+HELP.md
+target/
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
+.vscode/
+# Entornos
+.env
+.env.*
+
+# Backend (Spring Boot / Maven)
+back-end/authApi/authApi/target/
+*.class
+*.jar
+*.war
+.mvn/
+!/.mvn/wrapper/maven-wrapper.jar
+
+# Frontend (React / Node)
+node_modules/
+dist/
+build/
+.npm/
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
