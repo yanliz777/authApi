@@ -9,6 +9,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 /**
  * Configuración central de seguridad.
@@ -31,10 +32,13 @@ public class SecurityConfig {
      * Bean principal que configura la cadena de filtros HTTP.
      */
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, CorsConfigurationSource corsConfigurationSource) throws Exception {
         http
             // Deshabilitamos CSRF porque nuestra API será REST (no usamos cookies/formularios HTML clásicos)
             .csrf(AbstractHttpConfigurer::disable)
+            // Habilitamos CORS usando el Bean CorsConfig que definimos en config/CorsConfig.java
+            // Sin esto, el navegador bloqueará las peticiones desde React (localhost:5173)
+            .cors(cors -> cors.configurationSource(corsConfigurationSource))
             
             // Configuramos las políticas de autorización para las rutas
             .authorizeHttpRequests(auth -> auth
