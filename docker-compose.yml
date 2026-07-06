@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  # Base de Datos PostgreSQL
+  postgres_db:
+    image: postgres:15-alpine # Versión ligera de Postgres
+    container_name: auth_postgres
+    restart: always
+    env_file:
+      - ./authApi/authApi/.env
+    environment:
+      # Mapeamos las variables de Postgres con las que creamos en nuestro .env
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-admin}
+      POSTGRES_DB: auth_db
+    ports:
+      - "5432:5432" # Mapea el puerto del contenedor al de tu máquina (Windows)
+    volumes:
+      - pgdata:/var/lib/postgresql/data # Persistencia: Si borras el contenedor, no pierdes los datos
+
+volumes:
+  pgdata:
