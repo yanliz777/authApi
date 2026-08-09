@@ -1,9 +1,12 @@
 package com.yfGomez.authApi.services.impl;
 
+import com.yfGomez.authApi.dtos.request.LoginRequest;
 import com.yfGomez.authApi.dtos.request.RegistroRequest;
+import com.yfGomez.authApi.dtos.response.AuthResponse;
 import com.yfGomez.authApi.dtos.response.UsuarioResponse;
 import com.yfGomez.authApi.entities.Usuario;
 import com.yfGomez.authApi.repositories.UsuarioRepository;
+import com.yfGomez.authApi.security.JwtUtils;
 import com.yfGomez.authApi.services.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,9 +21,10 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
-    // Dependencias inyectadas (relación de Dependencia POO)
+    // Dependencias inyectadas por Spring IoC a través del constructor generado por Lombok
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtUtils jwtUtils; // Inyectamos nuestro componente utilitario de JWT
 
     @Override
     public UsuarioResponse registrarUsuario(RegistroRequest request) {
@@ -50,6 +54,32 @@ public class AuthServiceImpl implements AuthService {
                 .rol(usuarioGuardado.getRol())
                 .activo(usuarioGuardado.getActivo())
                 .creadoEn(usuarioGuardado.getCreadoEn())
+                .build();
+    }
+
+    @Override
+    public AuthResponse login(LoginRequest request) {
+        // 1. Buscar al usuario en PostgreSQL por su email
+        Usuario usuario = usuarioRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("Credenciales inválidas"));
+
+        // 2. Verificar que la contraseña en texto plano coincida con el hash BCrypt guardado en la BD
+        // passwordEncoder.matches(textoPlano, hashEncriptado)
+        if (!passwordEncoder.matches(request.getPassword(), usuario.getPassword())) {
+            throw new RuntimeException("Credenciales inválidas");
+        }
+
+        // 3. Generar el Token JWT firmado usando nuestro Bean JwtUtils
+        String token = jwtUtils.generarToken(usuario.getEmail(), usuario.getRol());
+
+        // 4. Retornar el DTO AuthResponse con el Token JWT y los datos públicos del usuario
+        return AuthResponse.builder()
+                .token(token)
+                .tipoToken("Bearer")
+                .id(usuario.getId())
+                .nombre(usuario.getNombre())
+                .email(usuario.getEmail())
+                .rol(usuario.getRol())
                 .build();
     }
 }

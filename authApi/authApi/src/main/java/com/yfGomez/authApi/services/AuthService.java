@@ -1,6 +1,8 @@
 package com.yfGomez.authApi.services;
 
+import com.yfGomez.authApi.dtos.request.LoginRequest;
 import com.yfGomez.authApi.dtos.request.RegistroRequest;
+import com.yfGomez.authApi.dtos.response.AuthResponse;
 import com.yfGomez.authApi.dtos.response.UsuarioResponse;
 
 /**
@@ -10,5 +12,7 @@ import com.yfGomez.authApi.dtos.response.UsuarioResponse;
 public interface AuthService {
     
     UsuarioResponse registrarUsuario(RegistroRequest request);
+    
+    AuthResponse login(LoginRequest request);
     
 }

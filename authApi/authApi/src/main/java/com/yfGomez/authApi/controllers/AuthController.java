@@ -1,6 +1,8 @@
 package com.yfGomez.authApi.controllers;
 
+import com.yfGomez.authApi.dtos.request.LoginRequest;
 import com.yfGomez.authApi.dtos.request.RegistroRequest;
+import com.yfGomez.authApi.dtos.response.AuthResponse;
 import com.yfGomez.authApi.dtos.response.UsuarioResponse;
 import com.yfGomez.authApi.services.AuthService;
 import jakarta.validation.Valid;
@@ -39,5 +41,19 @@ public class AuthController {
         
         // Retornamos la respuesta con el código HTTP 201 (Created) que es la mejor práctica para POST
         return ResponseEntity.status(HttpStatus.CREATED).body(nuevoUsuario);
+    }
+
+    /**
+     * Endpoint para iniciar sesión (Login).
+     * Método HTTP: POST
+     * Ruta completa: POST /api/v1/auth/login
+     *
+     * @param request El JSON con email y password.
+     * @return ResponseEntity con el Token JWT y status 200 (OK).
+     */
+    @PostMapping("/login")
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
+        AuthResponse response = authService.login(request);
+        return ResponseEntity.ok(response);
     }
 }
