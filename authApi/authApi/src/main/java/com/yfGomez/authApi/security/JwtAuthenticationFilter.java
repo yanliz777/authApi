@@ -44,26 +44,32 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        // 2. Extraer el token puro cortando la palabra "Bearer " (7 caracteres)
-        final String jwt = authHeader.substring(7);
-        final String userEmail = jwtUtils.obtenerEmailDelToken(jwt);
+        try {
+            // 2. Extraer el token puro cortando la palabra "Bearer " (7 caracteres) y eliminando espacios adicionales
+            final String jwt = authHeader.substring(7).trim();
+            final String userEmail = jwtUtils.obtenerEmailDelToken(jwt);
 
-        // 3. Si hay email y el usuario AÚN no ha sido autenticado en el contexto de la petición actual
-        if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+            // 3. Si hay email y el usuario AÚN no ha sido autenticado en el contexto de la petición actual
+            if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
 
-            // 4. Validar autenticidad de la firma y expiración del Token
-            if (jwtUtils.esTokenValido(jwt, userDetails.getUsername())) {
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        userDetails,
-                        null,
-                        userDetails.getAuthorities()
-                );
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                // 4. Validar autenticidad de la firma y expiración del Token
+                if (jwtUtils.esTokenValido(jwt, userDetails.getUsername())) {
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                            userDetails,
+                            null,
+                            userDetails.getAuthorities()
+                    );
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-                // 5. Establecer la autenticación del usuario en el SecurityContextHolder
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+                    // 5. Establecer la autenticación del usuario en el SecurityContextHolder
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }
             }
+        } catch (Exception e) {
+            // Si el token expiro, es invalido o fue alterado, capturamos el error
+            // al no llenar el SecurityContext, Spring Security denegara el acceso con 401
+            logger.error("Error al procesar el Token JWT: " + e.getMessage());
         }
 
         // 6. Pasar la petición al controlador correspondiente

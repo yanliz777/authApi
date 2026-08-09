@@ -9,6 +9,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfigurationSource;
 
@@ -44,6 +45,16 @@ public class SecurityConfig {
             // Habilitamos CORS usando el Bean CorsConfig que definimos en config/CorsConfig.java
             .cors(cors -> cors.configurationSource(corsConfigurationSource))
             
+            // Manejo de Excepciones: Cuando una petición sin token válido intenta acceder a una ruta privada,
+            // respondemos con 401 Unauthorized en lugar del 403 por defecto.
+            .exceptionHandling(exception -> exception
+                .authenticationEntryPoint((request, response, authException) -> {
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.setContentType("application/json");
+                    response.getWriter().write("{\"error\": \"No autorizado. Se requiere un Token JWT valido.\"}");
+                })
+            )
+
             // Configuramos las políticas de autorización para las rutas
             .authorizeHttpRequests(auth -> auth
                 // La ruta de registro y login deben ser públicas
