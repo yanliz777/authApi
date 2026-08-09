@@ -46,13 +46,14 @@ public class JwtUtils {
         Date ahora = new Date();
         Date expiracion = new Date(ahora.getTime() + jwtExpirationMs);
 
+        // Usamos el patrón Builder de la librería JJWT para construir el token paso a paso:
         return Jwts.builder()
-                .subject(email) // Asunto principal del token (quién es)
-                .claim("rol", rol) // Atributo personalizado en el Payload
-                .issuedAt(ahora) // Fecha de emisión
-                .expiration(expiracion) // Fecha de expiración
-                .signWith(getSigningKey()) // Firma digital con la clave secreta
-                .compact();
+                .subject(email)            // <-- Define el Claim registrado "sub" (Identificador principal del usuario)
+                .claim("rol", rol)         // <-- Define nuestro Claim personalizado "rol" (USER / ADMIN)
+                .issuedAt(ahora)           // <-- Define el Claim registrado "iat" (Fecha de emisión en timestamp)
+                .expiration(expiracion)    // <-- Define el Claim registrado "exp" (Fecha de expiración en timestamp)
+                .signWith(getSigningKey()) // <-- Genera la Firma Digital HMAC-SHA256 usando nuestra clave secreta del .env
+                .compact();                // <-- Convierte todo en la cadena final separada por puntos (Header.Payload.Signature)
     }
 
     /**
